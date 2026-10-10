@@ -157,8 +157,10 @@ def _candidates(game):
         if ph == Phase.TURN:
             p = s.players[s.current]
             out.append(DrawTickets())
+            in_hand = sum(p.hand.values())
             for r in board.routes:
-                if r.id in s.route_owner or p.trains < r.length:
+                # a payment needs `length` cards in total, so skip routes the hand cannot cover
+                if r.id in s.route_owner or p.trains < r.length or in_hand < r.length:
                     continue
                 colors = COLORS if r.color == "grey" else (r.color,)
                 out += [ClaimRoute(r.id, c, k) for c, k in _payments(p, r.length, colors, r.engines)]

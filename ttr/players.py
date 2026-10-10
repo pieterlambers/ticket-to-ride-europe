@@ -18,6 +18,8 @@ class HumanPlayer:
 
 
 class RandomPlayer:
+    uses_full_state = True  # ignores the view, so it can be handed the real game
+
     def __init__(self, seed=None):
         self.rng = random.Random(seed)
 

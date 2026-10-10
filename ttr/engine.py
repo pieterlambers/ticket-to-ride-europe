@@ -67,7 +67,7 @@ class Game:
 
     def view_for(self, i):
         """A copy of the game with the other players' private information hidden."""
-        g = copy.deepcopy(self)
+        g = copy.deepcopy(self, {id(self.board): self.board})  # the board is static: share it
         s = g.state
         for j, p in enumerate(s.players):
             if j != i:

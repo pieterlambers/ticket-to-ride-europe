@@ -26,3 +26,20 @@ python3 -m venv .venv
 - `gui/` is the Tkinter interface. It only submits actions to the engine.
 - `ttr/data/routes_full.csv` is the complete route table (colours and double routes), built from `map.jpg`.
 - A computer player only has to implement `Player.choose(game_view, legal_actions)` in `ttr/players.py`.
+
+## Computer opponents & training
+
+New-game dialog options: **Computer (heuristic)** (rule-based) and **Computer (AI)** (neural network, needs `models/best.pt`).
+
+- `ttr/ai/heuristic.py`: plans the cheapest routes for its tickets, collects the colours it needs, claims planned routes.
+- `ttr/ai/model.py`, `ttr/ai/neural.py`: policy/value network that scores each legal move; `ttr/ai/features.py` encodes the game (own hand and tickets plus public info only).
+- `models/best.pt` is the committed checkpoint. Training logs and data go to `runs/` (ignored by git).
+
+```bash
+.venv/bin/python -m train.evaluate --a heuristic --b random --games 500   # win-rate table
+.venv/bin/python -m train.imitate --games 20000 --epochs 5 --out models/bc.pt   # learn from the heuristic
+.venv/bin/python -m train.ppo --init models/bc.pt --iters 300               # self-play improvement
+.venv/bin/python -m train.evaluate --a neural --b heuristic --games 400
+```
+
+Current strength (2 players): heuristic beats random 100%; the AI beats random 100% and the heuristic about 56%.

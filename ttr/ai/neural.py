@@ -14,7 +14,7 @@ DEFAULT_CKPT = Path(__file__).resolve().parents[2] / "models" / "best.pt"
 class NeuralPlayer:
     uses_full_state = True  # reads only public info and its own cards
 
-    def __init__(self, ckpt=DEFAULT_CKPT, temperature=0.0, seed=None):
+    def __init__(self, ckpt=DEFAULT_CKPT, temperature=0.0, seed=None, model=None):
         import torch
 
         from .model import load_checkpoint
@@ -23,7 +23,9 @@ class NeuralPlayer:
         self.temperature = temperature
         self.rng = np.random.default_rng(seed)
         self.fallback = None
-        if Path(ckpt).exists():
+        if model is not None:
+            self.model = model
+        elif Path(ckpt).exists():
             self.model = load_checkpoint(ckpt)
         else:
             warnings.warn(f"checkpoint {ckpt} not found: playing with the heuristic bot instead")

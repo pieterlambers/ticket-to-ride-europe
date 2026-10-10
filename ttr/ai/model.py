@@ -33,9 +33,10 @@ def pad_logits(logits, owner, batch):
     return padded, pos
 
 
-def save_checkpoint(model, path):
+def save_checkpoint(model, path, **extra):
+    """`extra` (e.g. iter, optimizer state) is stored alongside the weights and ignored by load_checkpoint."""
     torch.save({"state_dict": model.state_dict(), "state_dim": model.state_dim, "act_dim": model.act_dim,
-                "hidden": model.hidden, "version": VERSION}, path)
+                "hidden": model.hidden, "version": VERSION, **extra}, path)
 
 
 def load_checkpoint(path):

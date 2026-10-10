@@ -1,0 +1,32 @@
+"""Player interface. A computer player only needs to implement choose()."""
+import random
+from typing import Protocol
+
+from .actions import ClaimRoute
+
+
+class Player(Protocol):
+    def choose(self, game_view, legal: list):
+        """Return one action from `legal`. `game_view` hides other players' private info."""
+
+
+class HumanPlayer:
+    """Marker: actions come from the GUI."""
+
+    def choose(self, game_view, legal):
+        raise NotImplementedError("Human actions come from the GUI")
+
+
+class RandomPlayer:
+    def __init__(self, seed=None):
+        self.rng = random.Random(seed)
+
+    def choose(self, game_view, legal):
+        claims = [a for a in legal if isinstance(a, ClaimRoute)]
+        if claims and self.rng.random() < 0.6:
+            return self.rng.choice(claims)
+        return self.rng.choice(legal)
+
+
+def make_player(kind: str, seed=None):
+    return RandomPlayer(seed) if kind == "random" else HumanPlayer()

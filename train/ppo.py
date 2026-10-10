@@ -166,7 +166,7 @@ def main():
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--out", default="runs/ppo")
     ap.add_argument("--eval-every", type=int, default=10)
-    ap.add_argument("--eval-games", type=int, default=200)
+    ap.add_argument("--eval-games", type=int, default=600)
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--entropy", type=float, default=0.01)
     ap.add_argument("--seed", type=int, default=0)
@@ -226,10 +226,14 @@ def main():
                 save_checkpoint(model, ck, iter=it, opt=opt.state_dict())
                 pool_paths.append(ck)
                 wh = evaluate("neural", "heuristic", args.eval_games, ck, None, args.workers)["win_rate"]
-                wb = evaluate("neural", "neural", args.eval_games, ck, str(best), args.workers)["win_rate"]
-                if wb >= 0.55:
+                rb = evaluate("neural", "neural", args.eval_games, ck, str(best), args.workers)
+                wb = rb["win_rate"]
+                if rb["ci_low"] > 0.5:  # promote only when clearly better than the saved best
+                    archive = Path("models/archive")
+                    archive.mkdir(parents=True, exist_ok=True)
+                    shutil.copy(best, archive / f"best_{int(time.time())}.pt")
                     shutil.copy(ck, best)
-                    print(f"  new best (win rate {wb:.3f} vs previous best)")
+                    print(f"  new best (win rate {wb:.3f}, ci_low {rb['ci_low']:.3f} vs previous best)")
             writer.writerow([it, f"{pl:.4f}", f"{vl:.4f}", f"{ent:.4f}", f"{margin:.3f}", f"{win:.3f}",
                              wh if wh == "" else f"{wh:.3f}", wb if wb == "" else f"{wb:.3f}", f"{time.time() - t0:.0f}"])
             log.flush()

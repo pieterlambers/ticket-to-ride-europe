@@ -37,4 +37,8 @@ def make_player(kind: str, seed=None):
         from .ai.heuristic import HeuristicPlayer  # lazy: keeps this module light
 
         return HeuristicPlayer(seed)
+    if kind == "neural":
+        from .ai.neural import NeuralPlayer
+
+        return NeuralPlayer(seed=seed)
     return HumanPlayer()

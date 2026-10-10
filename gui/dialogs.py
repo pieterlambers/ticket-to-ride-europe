@@ -1,5 +1,6 @@
 """Modal dialogs: game setup, ticket choice, payment choice, tunnel, game over."""
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
 from ttr.state import PLAYER_COLORS
@@ -37,6 +38,8 @@ def ask_setup(root, allow_random=False, seed=None):
     count = tk.IntVar(value=2)
     rows = []
     kind_by_label = {"Human": "human", "Computer (heuristic)": "heuristic"}
+    if (Path(__file__).resolve().parents[1] / "models" / "best.pt").exists():
+        kind_by_label["Computer (AI)"] = "neural"
     if allow_random:
         kind_by_label["Computer (random)"] = "random"
     kinds = list(kind_by_label)

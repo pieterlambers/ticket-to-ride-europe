@@ -31,4 +31,10 @@ class RandomPlayer:
 
 
 def make_player(kind: str, seed=None):
-    return RandomPlayer(seed) if kind == "random" else HumanPlayer()
+    if kind == "random":
+        return RandomPlayer(seed)
+    if kind == "heuristic":
+        from .ai.heuristic import HeuristicPlayer  # lazy: keeps this module light
+
+        return HeuristicPlayer(seed)
+    return HumanPlayer()

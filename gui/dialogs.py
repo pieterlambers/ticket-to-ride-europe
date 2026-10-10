@@ -36,7 +36,10 @@ def ask_setup(root, allow_random=False, seed=None):
     ttk.Label(frm, text="Number of players").grid(row=0, column=0, sticky="w")
     count = tk.IntVar(value=2)
     rows = []
-    kinds = ["Human"] + (["Computer (random)"] if allow_random else [])
+    kind_by_label = {"Human": "human", "Computer (heuristic)": "heuristic"}
+    if allow_random:
+        kind_by_label["Computer (random)"] = "random"
+    kinds = list(kind_by_label)
 
     def rebuild(*_):
         for name, kind, swatch in rows:
@@ -57,9 +60,6 @@ def ask_setup(root, allow_random=False, seed=None):
         name.grid(row=i + 1, column=1, pady=3, padx=4)
         kind.grid(row=i + 1, column=2, pady=3)
         rows.append((name, kind, swatch))
-    if not allow_random:
-        ttk.Label(frm, text="Computer players: coming later", foreground="#777").grid(
-            row=6, column=0, columnspan=3, sticky="w", pady=(6, 0))
     ttk.Label(frm, text="Seed (optional)").grid(row=7, column=0, sticky="w", pady=(8, 0))
     seed_var = tk.StringVar(value="" if seed is None else str(seed))
     ttk.Entry(frm, textvariable=seed_var, width=10).grid(row=7, column=1, sticky="w", pady=(8, 0))
@@ -68,7 +68,7 @@ def ask_setup(root, allow_random=False, seed=None):
         specs = []
         for i in range(count.get()):
             n = rows[i][0].get().strip() or f"Player {i + 1}"
-            specs.append((n, "random" if rows[i][1].get().startswith("Computer") else "human"))
+            specs.append((n, kind_by_label[rows[i][1].get()]))
         sd = seed_var.get().strip()
         result["value"] = (specs, int(sd) if sd.lstrip("-").isdigit() else None)
         win.destroy()

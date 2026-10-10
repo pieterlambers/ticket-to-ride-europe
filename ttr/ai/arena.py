@@ -20,3 +20,20 @@ def play_game(players, seed, n=2, max_steps=3000, game=None):
             raise RuntimeError(f"illegal action from player {actor}: {action}")
         g.apply(action)
     return g
+
+
+def make_bot(kind, seed=None, ckpt=None):
+    """Build a bot by name: random, heuristic or neural (neural arrives in milestone M3)."""
+    if kind == "random":
+        from ttr.players import RandomPlayer
+
+        return RandomPlayer(seed)
+    if kind == "heuristic":
+        from .heuristic import HeuristicPlayer
+
+        return HeuristicPlayer(seed)
+    if kind == "neural":
+        from .neural import NeuralPlayer
+
+        return NeuralPlayer(ckpt) if ckpt else NeuralPlayer()
+    raise ValueError(f"unknown player kind: {kind}")

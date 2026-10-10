@@ -111,5 +111,5 @@ def plan(game, me, extra_tickets=(), extra_stations=(), budget=None) -> dict:
         engines += r.engines
     return {
         "routes": planned, "need": need, "engines": engines, "uses": uses, "done": done,
-        "unreachable": unreachable, "too_expensive": too_expensive, "cost": total,
+        "unreachable": unreachable, "too_expensive": too_expensive, "cost": total, "costs": costs,
     }

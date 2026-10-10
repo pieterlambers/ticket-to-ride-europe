@@ -211,3 +211,18 @@ def explain_route(game, route_id: int) -> str:
         return f"Needs {route.engines} locomotive(s) and {route.length - route.engines} more matching cards"
     colour = "any single colour" if route.color == "grey" else route.color
     return f"Not enough cards: need {route.length} cards of {colour} (locomotives are wild)"
+
+
+def explain_station(game, city: str) -> str:
+    """Human-readable reason why a station cannot be built in `city` ('' if it can)."""
+    s = game.state
+    if s.phase != Phase.TURN:
+        return "You cannot build a station now"
+    p = s.players[s.current]
+    if city in s.station_owner:
+        return "This city already has a station"
+    if p.stations_left <= 0:
+        return "You have no stations left"
+    if any(isinstance(a, BuildStation) and a.city == city for a in legal_actions(game)):
+        return ""
+    return f"Need {station_cost(p)} card(s) of one colour (locomotives are wild)"

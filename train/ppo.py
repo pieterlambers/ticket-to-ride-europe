@@ -189,6 +189,7 @@ def main():
     ap.add_argument("--target-kl", type=float, default=0.02)
     ap.add_argument("--potential-coef", type=float, default=0.0)
     ap.add_argument("--opp-heuristic", default="heuristic")
+    ap.add_argument("--separate-value", action="store_true", help="give the value head its own encoder")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -198,6 +199,8 @@ def main():
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     model = load_checkpoint(args.resume or args.init)
+    if args.separate_value:
+        model.add_separate_value()
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     start = 0
     if args.resume:

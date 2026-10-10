@@ -37,7 +37,7 @@ def _taken(s, twins, rid, seat):
 
 
 def run_one(args):
-    kind_a, kind_b, ckpt_a, ckpt_b, i = args
+    kind_a, kind_b, ckpt_a, ckpt_b, i = args[:5]
     probes = [Probe(make_bot(kind_a, i * 2, ckpt_a)), Probe(make_bot(kind_b, i * 2 + 1, ckpt_b))]
     seat_a = i % 2
     if seat_a == 1:

@@ -15,12 +15,12 @@ COMPONENTS = ("routes", "tickets", "stations", "express")
 
 
 def run_one(args):
-    kind_a, kind_b, ckpt_a, ckpt_b, i = args
+    kind_a, kind_b, ckpt_a, ckpt_b, i, offset = args
     a = make_bot(kind_a, i * 2, ckpt_a)
     b = make_bot(kind_b, i * 2 + 1, ckpt_b)
     seat_a = i % 2  # the two games of a pair share the seed and swap the seats
     players = [a, b] if seat_a == 0 else [b, a]
-    g = play_game(players, seed=i // 2)
+    g = play_game(players, seed=offset + i // 2)
     rows = g.state.final_scores
     ra, rb = rows[seat_a], rows[1 - seat_a]
     held = [len(p.tickets) for p in g.state.players]
@@ -56,9 +56,9 @@ def run_pool(fn, jobs, workers):
         return pool.map(fn, jobs, chunksize=max(1, len(jobs) // (workers * 4)))
 
 
-def evaluate(kind_a, kind_b, games, ckpt_a=None, ckpt_b=None, workers=None):
+def evaluate(kind_a, kind_b, games, ckpt_a=None, ckpt_b=None, workers=None, seed_offset=0):
     games += games % 2  # whole pairs only
-    jobs = [(kind_a, kind_b, ckpt_a, ckpt_b, i) for i in range(games)]
+    jobs = [(kind_a, kind_b, ckpt_a, ckpt_b, i, seed_offset) for i in range(games)]
     results = run_pool(run_one, jobs, workers)
     n = len(results)
     mean = lambda k: sum(r[k] for r in results) / n  # noqa: E731
@@ -82,8 +82,9 @@ def main():
     ap.add_argument("--a-ckpt")
     ap.add_argument("--b-ckpt")
     ap.add_argument("--workers", type=int)
+    ap.add_argument("--seed-offset", type=int, default=0, help="use other deals than the default ones")
     args = ap.parse_args()
-    r = evaluate(args.a, args.b, args.games, args.a_ckpt, args.b_ckpt, args.workers)
+    r = evaluate(args.a, args.b, args.games, args.a_ckpt, args.b_ckpt, args.workers, args.seed_offset)
     print(f"{args.a} (A) vs {args.b} (B), {r['games']} games (paired seeds, seats swapped)")
     print(f"  A win rate      {r['win_rate']:.3f}   95% CI [{r['ci_low']:.3f}, {r['ci_high']:.3f}]   (ties count 1/2)")
     print(f"  mean score      A {r['a_score']:.1f}   B {r['b_score']:.1f}   margin {r['margin']:+.1f}")

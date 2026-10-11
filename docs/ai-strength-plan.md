@@ -306,4 +306,10 @@ Reward = win/loss (+ small margin term), no route-points shaping, KL early stop,
 ### M7
 ### M8
 ### M9
+Implemented: `ttr/ai/determinize.py` (`sample_world`), `ttr/ai/search.py` (`SearchPlayer`), `NeuralPlayer.score`, `make_bot("search")`, `make_player("neural_search")`, `tests/test_search.py` (consistency, no-leak, legal games for 2 and 3 players). The GUI label was not added because search did not help.
+- Cost per searched decision (4 candidates, rollouts by the v1 heuristic): n=4 worlds 0.29 s, n=8 0.64 s, n=16 1.21 s. Default n=12. About 25 of 63 decisions per game are searched.
+- Search vs plain network, 1000 games, fresh deals, n=12: **0.509**, CI [0.481, 0.538], margin -1.3 (target 0.60: **not reached**). A 200-game pilot had shown 0.575, which was noise.
+- Search vs heuristic: not measured (run stopped by the user).
+- The plan's retry with n doubled was not run; stopped by the user. See `docs/ai-followup.md`.
+
 

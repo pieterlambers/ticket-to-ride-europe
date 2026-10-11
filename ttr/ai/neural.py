@@ -32,22 +32,30 @@ class NeuralPlayer:
             self.model = None
             self.fallback = HeuristicPlayer(seed)
 
-    def choose(self, game, legal):
-        if self.fallback is not None:
-            return self.fallback.choose(game, legal)
+    def score(self, game, legal):
+        """Macro list, the network's logit for each macro and the plan, for the acting player."""
         torch = self.torch
         me = game.actor
         plan = graph.plan(game, me)
         ms = macros(game, legal)
         if len(ms) == 1:
-            return to_action(game, ms[0], legal, plan["need"])
+            return ms, np.zeros(1, np.float32), plan
         state = torch.from_numpy(features.encode_state(game, me, plan)).unsqueeze(0)
         acts = torch.from_numpy(features.encode_actions(game, me, ms, plan))
         with torch.no_grad():
             logits, _ = self.model(state, acts, torch.zeros(len(ms), dtype=torch.long))
-        if self.temperature > 0:
-            p = torch.softmax(logits / self.temperature, 0).numpy().astype(np.float64)
+        return ms, logits.numpy(), plan
+
+    def choose(self, game, legal):
+        if self.fallback is not None:
+            return self.fallback.choose(game, legal)
+        ms, logits, plan = self.score(game, legal)
+        if len(ms) == 1:
+            i = 0
+        elif self.temperature > 0:
+            z = logits.astype(np.float64) / self.temperature
+            p = np.exp(z - z.max())
             i = int(self.rng.choice(len(ms), p=p / p.sum()))
         else:
-            i = int(torch.argmax(logits))
+            i = int(np.argmax(logits))
         return to_action(game, ms[i], legal, plan["need"])

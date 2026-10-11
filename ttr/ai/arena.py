@@ -36,4 +36,8 @@ def make_bot(kind, seed=None, ckpt=None):
         from .neural import NeuralPlayer
 
         return NeuralPlayer(ckpt) if ckpt else NeuralPlayer()
+    if kind == "search":
+        from .search import SearchPlayer
+
+        return SearchPlayer(ckpt, seed=seed)
     raise ValueError(f"unknown player kind: {kind}")

@@ -41,4 +41,8 @@ def make_player(kind: str, seed=None):
         from .ai.neural import NeuralPlayer
 
         return NeuralPlayer(seed=seed)
+    if kind == "neural_search":
+        from .ai.search import SearchPlayer
+
+        return SearchPlayer(seed=seed)
     return HumanPlayer()

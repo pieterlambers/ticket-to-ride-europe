@@ -294,6 +294,15 @@ Findings (these set the order of the M7 steps):
 - Express: net 5.8 vs 4.9 points, so longest-trail play still has headroom (step 4).
 - Heuristic vs heuristic gives exactly 0.500 with identical per-side stats, so the paired evaluation is unbiased.
 ### M6
+Reward = win/loss (+ small margin term), no route-points shaping, KL early stop, entropy 0.003 annealed, 512 games/iter, lr 5e-5, opponent pool 20% latest / 40% heuristic / 30% recent checkpoints / 10% best.
+- Run 1 (`runs/ppo3`, 200 iters, shared encoder): `best.pt` went from 0.564 to 0.594 vs heuristic (1000 games, CI [0.569, 0.619]). Value loss stayed about 0.17, so the separate value head was added (`PolicyValueNet.add_separate_value`, `--separate-value`).
+- Run 2 (`runs/ppo4`, 200 iters, separate value head) and then an overnight continuation of the same run (`--resume`, up to iteration 3200, 19 promotions). Win rate vs heuristic climbed from 0.60 to about 0.85 and stayed there.
+- Final `models/best.pt`, measured on fresh deals (`--seed-offset 500000`, 1000 games unless noted):
+  - vs heuristic: **0.874**, CI [0.854, 0.894], score margin +49.2 (net tickets +27.6 vs +6.8, routes 73.2 vs 49.2, express 7.3 vs 3.1).
+  - vs the original M4 net: 0.808, CI [0.786, 0.830].
+  - vs the run-1 net: 0.797, CI [0.773, 0.821].
+  - vs random (400 games): 1.000.
+- Caveat: the heuristic only completes 2.4 tickets and fails 1.3 per game against this net (it fails 0.6 against the old net). The net partly wins by blocking the routes the heuristic is committed to. Its wins over the older nets show the gain is not only that. M7 steps 1 (contested routes) and 3 (tickets by turns) should therefore still help the teacher.
 ### M7
 ### M8
 ### M9
